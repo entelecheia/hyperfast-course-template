@@ -1,5 +1,11 @@
 <!--next-version-placeholder-->
 
+## v0.1.0 (2024-08-22)
+
+### Feature
+
+* **makefile:** Add reinit-project-force and test initialization commands ([`e3ee03b`](https://github.com/entelecheia/hyperfast-course-template/commit/e3ee03b1e16bbe5cbcfc49fcdacb6b877e470f77))
+
 ## v0.3.0 (2024-07-13)
 
 ### Feature
