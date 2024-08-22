@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hyperfast-course-template"
-version = "0.0.0"
+version = "0.1.0"
 description = "Multilingual course creation template with interactive documentation support for international audiences"
 authors = ["Young Joon Lee <entelecheia@hotmail.com>"]
 license = "CC-BY-4.0"
