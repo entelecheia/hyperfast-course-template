@@ -1,4 +1,4 @@
-"""Command line interface for """
+"""Command line interface for hypercourse"""
 
 # Importing the libraries
 
@@ -9,6 +9,7 @@ import click
 import yaml
 
 from hypercourse._version import __version__
+
 
 __package_path__ = os.path.abspath(os.path.dirname(__file__))
 __package_name__ = os.path.basename(__package_path__)

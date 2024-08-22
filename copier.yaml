@@ -148,7 +148,7 @@ lang_name_2:
 giscus_data_repo_id:
   default: "[REPLACE_ME]"
   type: str
-  help: What is the repository ID? (e.g. R_kgDOH-wD9A)
+  help: What is the repository ID? (e.g. R_kgDOMmoaUg)
 
 giscus_data_category:
   default: "Q&A"
