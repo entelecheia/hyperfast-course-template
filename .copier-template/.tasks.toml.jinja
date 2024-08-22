@@ -77,8 +77,6 @@ cmd = "poetry build"
 help = "build the package"
 {%- endif %}
 
-{%- if documentaion_tool == 'jupyter-book' %}
-
 [tool.poe.tasks.install-ghp-import]
 cmd = "pipx install ghp-import"
 help = "install ghp-import"
@@ -107,16 +105,6 @@ help = "build the book with all outputs"
 [tool.poe.tasks.book-publish]
 cmd = "ghp-import -n -p -f book/_build/html"
 help = "publish the book"
-{%- elif documentaion_tool == 'mkdocs' %}
-
-[tool.poe.tasks.build-docs]
-cmd = "mkdocs build -f mkdocs.yaml"
-help = "build documentation"
-
-[tool.poe.tasks.install-mkdocs]
-cmd = "pip install -r docs/requirements.txt"
-help = "install mkdocs"
-{%- endif %}
 
 [tool.poe.tasks.install]
 cmd = "poetry install --without dev"

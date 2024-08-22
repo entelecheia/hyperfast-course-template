@@ -7,7 +7,6 @@ code_template_answers_file: .copier-hyfi-config.yaml
 code_template_source: ''
 codecov_graph_token: usYkLC6aBx
 copyright_year: 2024
-documentaion_tool: jupyter-book
 documentation_url: https://entelecheia.github.io/hyperfast-course-template
 email: entelecheia@hotmail.com
 favicon_path: https://assets.entelecheia.ai/favicon.png

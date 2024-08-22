@@ -115,15 +115,6 @@ upload_to_repository:
   type: bool
   help: Do you want to upload the package to the PyPI repository?
 
-documentaion_tool:
-  default: jupyter-book
-  type: str
-  choices:
-    - jupyter-book
-    - mkdocs
-    - none
-  help: What documentation tool do you want to use?
-
 copyright_year:
   default: "{{ '%Y' | strftime }}"
   type: int
