@@ -98,16 +98,27 @@ initialize: install-pipx ## initialize the project environment
 	@pre-commit install
 
 remove-template: ## remove template-specific files
-	@rm -rf src/coursetempi
-	@rm -rf tests/coursetempi
+	@rm -rf src/hypercourse
+	@rm -rf tests/hypercourse
 	@rm -rf CHANGELOG.md
 	@echo "Template-specific files removed."
 
 init-project: initialize remove-template ## initialize the project (Warning: do this only once!)
-	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .
+	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-course-template .
 
 reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
-	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .'
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --vcs-ref=HEAD . .'
+
+reinit-project-force: install-copier ## initialize the project ignoring existing files (Warning: this will overwrite existing files!)
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --force --vcs-ref=HEAD . .'
+
+test-init-project: install-copier ## test initializing the project to a temporary directory
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --vcs-ref=HEAD . tmp'
+	@rm -rf tmp/.git
+
+test-init-project-force: install-copier ## test initializing the project to a temporary directory forcing overwrite
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --force --vcs-ref=HEAD . tmp'
+	@rm -rf tmp/.git
 
 reinit-docker-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
 	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-docker-config.yaml --trust gh:entelecheia/hyperfast-docker-template .'
