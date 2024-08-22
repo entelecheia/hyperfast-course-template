@@ -25,6 +25,24 @@ help:  ## Display this help
 clean: ## run all clean commands
 	@poe clean
 
+##@ Git Branches
+
+show-branches: ## show all branches
+	@git show-branch --list
+
+dev-checkout: ## checkout the dev branch
+	@branch=$(shell echo $${branch:-"dev"}) && \
+	    git show-branch --list | grep -q $${branch} && \
+		git checkout $${branch}
+
+dev-checkout-upstream: ## create and checkout the dev branch, and set the upstream
+	@branch=$(shell echo $${branch:-"dev"}) && \
+		git checkout -B $${branch} && \
+		git push --set-upstream origin $${branch} || true
+
+main-checkout: ## checkout the main branch
+	@git checkout main
+
 ##@ Utilities
 
 large-files: ## show the 20 largest files in the repo
@@ -78,17 +96,17 @@ install-precommit-hooks: install-precommit ## install pre-commit hooks
 	@pre-commit install
 
 mkvirtualenv: ## create the project environment
-	@python3 -m venv "$$WORKON_HOME/deepnlp-2023"
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
+	@python3 -m venv "$$WORKON_HOME/{{project_name}}"
+	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
 	@pip install --upgrade pip setuptools wheel
 
 mkvirtualenv-system: ## create the project environment with system site packages
-	@python3 -m venv "$$WORKON_HOME/deepnlp-2023" --system-site-packages
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
+	@python3 -m venv "$$WORKON_HOME/{{project_name}}" --system-site-packages
+	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
 	@pip install --upgrade pip setuptools wheel
 
 workon: ## activate the project environment
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
+	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
 
 initialize: install-pipx ## initialize the project environment
 	@pipx install copier
@@ -97,63 +115,24 @@ initialize: install-pipx ## initialize the project environment
 	@pipx install pre-commit
 	@pre-commit install
 
-remove-template: ## remove template-specific files
-	@rm -rf src/hypercourse
-	@rm -rf tests/hypercourse
-	@rm -rf CHANGELOG.md
-	@echo "Template-specific files removed."
+init-project: initialize {%- if not project_name.endswith('-template') %} remove-template{% endif %} ## initialize the project (Warning: do this only once!)
+	@copier copy --trust {%- if code_template_source and code_template_source != 'None' %} --data 'code_template_source={{code_template_source}}'{% endif %} --answers-file .copier-config.yaml {%- if project_name.endswith('-template') %} --vcs-ref=HEAD{% endif %} gh:entelecheia/hyperfast-python-template .
 
-init-project: initialize remove-template ## initialize the project (Warning: do this only once!)
-	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .
-
+{% if project_name == 'hyperfast-python-template' -%}
 reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
-	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .'
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --vcs-ref=HEAD . .'
 
-reinit-docker-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
-	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-docker-config.yaml --trust gh:entelecheia/hyperfast-docker-template .'
+reinit-project-force: install-copier ## initialize the project ignoring existing files (Warning: this will overwrite existing files!)
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --force --vcs-ref=HEAD . .'
 
-##@ Docker
+test-init-project: install-copier ## test initializing the project to a temporary directory
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --vcs-ref=HEAD . tmp'
+	@rm -rf tmp/.git
 
-symlink-global-docker-env: ## symlink global docker env file for local development
-	@DOCKERFILES_SHARE_DIR="$HOME/.local/share/dockerfiles" \
-	DOCKER_GLOBAL_ENV_FILENAME=".env.docker" \
-	DOCKER_GLOBAL_ENV_FILE="$${DOCKERFILES_SHARE_DIR}/$${DOCKER_GLOBAL_ENV_FILENAME}" \
-	[ -f "$${DOCKER_GLOBAL_ENV_FILE}" ] && ln -sf "$${DOCKER_GLOBAL_ENV_FILE}" .env.docker || echo "Global docker env file not found"
-
-docker-login: ## login to docker
-	@bash .docker/.docker-scripts/docker-compose.sh login
-
-docker-build: ## build the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh build
-
-docker-config: ## show the docker app config
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh config
-
-docker-push: ## push the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh push
-
-docker-run: ## run the docker base image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh run
-
-docker-up: ## launch the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh up
-
-docker-up-detach: ## launch the docker app image in detached mode
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh up --detach
-
-docker-tag-latest: ## tag the docker app image as latest
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh tag
+test-init-project-force: install-copier ## test initializing the project to a temporary directory forcing overwrite
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --force --vcs-ref=HEAD . tmp'
+	@rm -rf tmp/.git
+{% else -%}
+reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" {%- if code_template_source and code_template_source != 'None' %} --data 'code_template_source={{code_template_source}}'{% endif %} --answers-file .copier-config.yaml {%- if project_name.endswith('-template') %} --vcs-ref=HEAD{% endif %} gh:entelecheia/hyperfast-python-template .'
+{% endif -%}

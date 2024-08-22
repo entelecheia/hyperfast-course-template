@@ -8,19 +8,19 @@ code_template_source: ''
 codecov_graph_token: usYkLC6aBx
 copyright_year: 2024
 documentaion_tool: jupyter-book
-documentation_url: https://entelecheia.github.io/course-template-i18n
+documentation_url: https://entelecheia.github.io/hyperfast-course-template
 email: entelecheia@hotmail.com
 favicon_path: https://assets.entelecheia.ai/favicon.png
 friendly_name: Course Template Internationalization
-github_repo_name: course-template-i18n
+github_repo_name: hyperfast-course-template
 github_username: entelecheia
 google_analytics_id: G-BQJE5V9RK2
 logo_path: ''
 main_branch: main
 open_link: true
-package_name: coursetempi
+package_name: hypercourse
 package_scripts:
-- coursetempi = 'coursetempi.__cli__:main'
+- hypercourse = 'hypercourse.__cli__:main'
 poe_task_files:
 - .tasks.toml
 - .tasks-extra.toml
@@ -30,7 +30,7 @@ project_description: This project provides a comprehensive and flexible template
     to easily develop, maintain, and share their educational materials across different
     languages and cultures.
 project_license: CC-BY-4.0
-project_name: course-template-i18n
+project_name: hyperfast-course-template
 project_short_description: Multilingual course creation template with interactive
     documentation support for international audiences
 upload_to_release: true

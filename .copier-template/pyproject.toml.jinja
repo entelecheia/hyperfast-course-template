@@ -1,21 +1,26 @@
 [tool.poetry]
-name = "hyperfast-course-template"
-version = "0.3.0"
-description = "Multilingual course creation template with interactive documentation support for international audiences"
-authors = ["Young Joon Lee <entelecheia@hotmail.com>"]
-license = "CC-BY-4.0"
-homepage = "https://entelecheia.github.io/hyperfast-course-template"
-repository = "https://github.com/entelecheia/hyperfast-course-template"
+name = "{{ project_name }}"
+version = "0.0.0"
+description = "{{ project_short_description }}"
+authors = ["{{ author }} <{{ email }}>"]
+license = "{{ project_license }}"
+homepage = "{{ documentation_url }}"
+repository = "https://github.com/{{ github_username }}/{{ github_repo_name }}"
 readme = "README.md"
-packages = [{ include = "hypercourse", from = "src" }]
+{% if build_and_release -%}
+packages = [{ include = "{{ package_name }}", from = "src" }]
 
+{% if package_scripts -%}
 [tool.poetry.scripts]
-hypercourse = 'hypercourse.__cli__:main'
+{% for script in package_scripts -%}
+{{ script }}{{ "\n" if not loop.last }}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.13"
 click = "^8.1.3"
-pyyaml = "^6.0.2"
 
 [tool.poetry.group.dev]
 optional = true
@@ -30,8 +35,10 @@ flake8-pyproject = "^1.2.2"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 
+{% if poe_task_files -%}
 [tool.poe]
-include = [".tasks.toml", ".tasks-extra.toml"]
+include = {{ poe_task_files|to_json }}
+{%- endif %}
 
 [tool.black]
 # 'extend-exclude' excludes files or directories in addition to the defaults
@@ -100,8 +107,9 @@ tag_format = "v$version"
 [tool.semantic_release]
 branch = "main"
 version_toml = "pyproject.toml:tool.poetry.version"
-version_pattern = '.docker/docker.version:IMAGE_VERSION="{version}"'
-version_variable = "src/hypercourse/_version.py:__version__"
+{% if build_and_release -%}
+version_variable = "src/{{ package_name }}/_version.py:__version__"
+{% endif -%}
 version_source = "tag"
 commit_version_number = true # required for version_source = "tag"
 commit_subject = "chore(release): :rocket: {version} [skip ci]"
@@ -109,12 +117,15 @@ prerelease_tag = "rc"
 major_on_zero = true
 tag_commit = true
 changelog_file = "CHANGELOG.md"
-upload_to_repository = true
-upload_to_release = true
+upload_to_repository = {{ upload_to_repository|to_json }}
+upload_to_release = {{ upload_to_release|to_json }}
 hvcs = "github" # hosting version control system, gitlab is also supported
+{% if build_and_release -%}
 build_command = "poetry build --no-cache"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
+{% else -%}
+build_command = "mkdir -p dist && echo 'No build command configured' > dist/release.txt"
+{%- endif %}
