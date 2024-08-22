@@ -125,6 +125,41 @@ documentation_url:
   type: str
   help: What is your documentation URL?
 
+lang_code_1:
+  default: en
+  type: str
+  help: What is the first language code? (e.g. en)
+
+lang_code_2:
+  default: ko
+  type: str
+  help: What is the second language code? (e.g. es)
+
+lang_name_1:
+  default: English
+  type: str
+  help: What is the first language name? (e.g. English)
+
+lang_name_2:
+  default: 한국어
+  type: str
+  help: What is the second language name? (e.g. 한국어)
+
+giscus_data_repo_id:
+  default: "[REPLACE_ME]"
+  type: str
+  help: What is the repository ID? (e.g. R_kgDOH-wD9A)
+
+giscus_data_category:
+  default: "Q&A"
+  type: str
+  help: What is the category? (e.g. Q&A)
+
+giscus_data_category_id:
+  default: "[REPLACE_ME]"
+  type: str
+  help: What is the category ID? (e.g. DIC_kwDOH-wD9M4CWANU)
+
 favicon_path:
   type: str
   help: What is the path to your favicon? (leave empty if you don't have one. e.g. favicon.png or https://example.com/favicon.png)
