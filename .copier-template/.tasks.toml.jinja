@@ -95,11 +95,11 @@ shell = """
 help = "install jupyter-book"
 
 [tool.poe.tasks.book-build]
-cmd = "jupyter-book build book"
+cmd = "bash book/_scripts/build.sh"
 help = "build the book"
 
 [tool.poe.tasks.book-build-all]
-cmd = "jupyter-book build book --all"
+cmd = "bash book/_scripts/build.sh --all"
 help = "build the book with all outputs"
 
 [tool.poe.tasks.book-publish]
