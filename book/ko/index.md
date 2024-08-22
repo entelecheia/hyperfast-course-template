@@ -8,7 +8,7 @@
 [![codecov][codecov-image]][codecov-url]
 
 <!-- Links: -->
-[hyperfast python template]: https://github.com/entelecheia/hyperfast-python-template
+[hyperfast course template]: https://github.com/entelecheia/hyperfast-course-template
 
 [codecov-image]: https://codecov.io/gh/entelecheia/hyperfast-course-template/branch/main/graph/badge.svg?token=usYkLC6aBx
 [codecov-url]: https://codecov.io/gh/entelecheia/hyperfast-course-template

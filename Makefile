@@ -104,10 +104,10 @@ remove-template: ## remove template-specific files
 	@echo "Template-specific files removed."
 
 init-project: initialize remove-template ## initialize the project (Warning: do this only once!)
-	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .
+	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-course-template .
 
 reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
-	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" --answers-file .copier-config.yaml gh:entelecheia/hyperfast-python-template .'
+	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" --answers-file .copier-config.yaml gh:entelecheia/hyperfast-course-template .'
 
 reinit-docker-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
 	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-docker-config.yaml --trust gh:entelecheia/hyperfast-docker-template .'
