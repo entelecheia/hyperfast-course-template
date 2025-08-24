@@ -1,56 +1,49 @@
-.PHONY: install
-install: install-uv ## Install the virtual environment and install the pre-commit hooks
-	@echo "🚀 Creating virtual environment using uv"
-	@uv sync
-	@uv run pre-commit install
-
-.PHONY: check
-check: ## Run code quality tools.
-	@echo "🚀 Checking lock file consistency with 'pyproject.toml'"
-	@uv lock --locked
-	@echo "🚀 Linting code: Running pre-commit"
-	@uv run pre-commit run -a
-	@echo "🚀 Static type checking: Running mypy"
-	@uv run mypy --config-file pyproject.toml src
-	@echo "🚀 Checking for obsolete dependencies: Running deptry"
-	@uv run deptry .
-
-.PHONY: test
-test: ## Test the code with pytest
-	@echo "🚀 Testing code: Running pytest"
-	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml --junitxml=tests/pytest.xml | tee tests/pytest-coverage.txt
-
-.PHONY: build
-build: clean-build ## Build wheel file
-	@echo "🚀 Creating wheel file"
-	@uvx --from build pyproject-build --installer uv
-
-.PHONY: clean-build
-clean-build: ## Clean build artifacts
-	@echo "🚀 Removing build artifacts"
-	@uv run python -c "import shutil; import os; shutil.rmtree('dist') if os.path.exists('dist') else None"
-
-.PHONY: publish
-publish: ## Publish a release to PyPI.
-	@echo "🚀 Publishing."
-	@uvx twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-
-.PHONY: build-and-publish
-build-and-publish: build publish ## Build and publish.
-
-.PHONY: docs-test
-docs-test: ## Test if documentation can be built without warnings or errors
-	@bash book/_scripts/build.sh
-
-.PHONY: docs
-docs: ## Build and serve the documentation
-	@bash book/_scripts/build.sh && echo "📚 Documentation built successfully"
+# To do stuff with make, you type `make` in a directory that has a file called
+# "Makefile".  You can also type `make -f <makefile>` to use a different filename.
+#
+# A Makefile is a collection of rules. Each rule is a recipe to do a specific
+# thing, sort of like a grunt task or an npm package.json script.
+#
+# A rule looks like this:
+#
+# <target>: <prerequisites...>
+# 	<commands>
+#
+# The "target" is required. The prerequisites are optional, and the commands
+# are also optional, but you have to have one or the other.
+#
+# Type `make` to show the available targets and a description of each.
+#
+.DEFAULT_GOAL := help
+.PHONY: help
+help:  ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 
-##@ Utilities
+##@ Clean-up
 
 clean: ## run all clean commands
 	@poe clean
+
+##@ Git Branches
+
+show-branches: ## show all branches
+	@git show-branch --list
+
+dev-checkout: ## checkout the dev branch
+	@branch=$(shell echo $${branch:-"dev"}) && \
+	    git show-branch --list | grep -q $${branch} && \
+		git checkout $${branch}
+
+dev-checkout-upstream: ## create and checkout the dev branch, and set the upstream
+	@branch=$(shell echo $${branch:-"dev"}) && \
+		git checkout -B $${branch} && \
+		git push --set-upstream origin $${branch} || true
+
+main-checkout: ## checkout the main branch
+	@git checkout main
+
+##@ Utilities
 
 large-files: ## show the 20 largest files in the repo
 	@find . -printf '%s %p\n'| sort -nr | head -20
@@ -87,21 +80,34 @@ install-pipx: ## install pipx (pre-requisite for external tools)
 install-copier: install-pipx ## install copier (pre-requisite for init-project)
 	@command -v copier &> /dev/null || pipx install copier || true
 
-install-uv: ## Install uv (pre-requisite for install)
-	@echo "🚀 Installing uv"
+install-uv: ## install uv (pre-requisite for install)
 	@command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || true
 
-initialize: install ## Initialize the project environment
-	@echo "🚀 Project initialized successfully"
+install-poe: install-pipx ## install poetry (pre-requisite for install)
+	@command -v poe &> /dev/null || pipx install poethepoet || true
 
-remove-template: ## remove template-specific files
-	@rm -rf src/hypercourse
-	@rm -rf tests/hypercourse
-	@rm -rf CHANGELOG.md
-	@echo "Template-specific files removed."
+install-commitzen: install-pipx ## install commitzen (pre-requisite for commit)
+	@command -v cz &> /dev/null || pipx install commitizen || true
 
-init-project: initialize remove-template ## initialize the project (Warning: do this only once!)
-	@copier copy --trust --answers-file .copier-config.yaml gh:entelecheia/hyperfast-course-template .
+install-precommit: install-pipx ## install pre-commit
+	@command -v pre-commit &> /dev/null || pipx install pre-commit || true
+
+install-precommit-hooks: install-precommit ## install pre-commit hooks
+	@pre-commit install
+
+install: install-uv ## install virtual environment with uv and pre-commit hooks
+	@uv sync --all-extras
+	@uv run pre-commit install
+
+initialize: install-pipx ## initialize the project environment
+	@pipx install copier
+	@pipx install poethepoet
+	@pipx install commitizen
+	@pipx install pre-commit
+	@pre-commit install
+
+init-project: initialize ## initialize the project (Warning: do this only once!)
+	@copier copy --trust --answers-file .copier-config.yaml --vcs-ref=HEAD gh:entelecheia/hyperfast-course-template .
 
 reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
 	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --vcs-ref=HEAD . .'
@@ -116,59 +122,57 @@ test-init-project: install-copier ## test initializing the project to a temporar
 test-init-project-force: install-copier ## test initializing the project to a temporary directory forcing overwrite
 	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-config.yaml --trust --force --vcs-ref=HEAD . tmp'
 	@rm -rf tmp/.git
+##@ Development
 
-reinit-docker-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
-	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy "$${args[@]}" --answers-file .copier-docker-config.yaml --trust gh:entelecheia/hyperfast-docker-template .'
+sync: ## sync dependencies using uv
+	@uv sync
 
-##@ Docker
+sync-all: ## sync dependencies with all extras using uv
+	@uv sync --all-extras
 
-symlink-global-docker-env: ## symlink global docker env file for local development
-	@DOCKERFILES_SHARE_DIR="$HOME/.local/share/dockerfiles" \
-	DOCKER_GLOBAL_ENV_FILENAME=".env.docker" \
-	DOCKER_GLOBAL_ENV_FILE="$${DOCKERFILES_SHARE_DIR}/$${DOCKER_GLOBAL_ENV_FILENAME}" \
-	[ -f "$${DOCKER_GLOBAL_ENV_FILE}" ] && ln -sf "$${DOCKER_GLOBAL_ENV_FILE}" .env.docker || echo "Global docker env file not found"
+lock: ## lock dependencies using uv
+	@uv lock
 
-docker-login: ## login to docker
-	@bash .docker/.docker-scripts/docker-compose.sh login
+lock-upgrade: ## upgrade and lock dependencies using uv
+	@uv lock --upgrade
 
-docker-build: ## build the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh build
+check: ## run all code quality checks (lint, type check, dependency check)
+	@uv run ruff check src/
+	@uv run mypy --config-file pyproject.toml src/
+	@uv run deptry .
 
-docker-config: ## show the docker app config
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh config
+lint: ## run ruff linter
+	@uv run ruff check src/
 
-docker-push: ## push the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh push
+format: ## format code using ruff
+	@uv run ruff format src/
+	@uv run ruff check --fix src/
 
-docker-run: ## run the docker base image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh run
+type-check: ## run mypy type checker
+	@uv run mypy --config-file pyproject.toml src/
 
-docker-up: ## launch the docker app image
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh up
+dep-check: ## check for obsolete dependencies
+	@uv run deptry .
 
-docker-up-detach: ## launch the docker app image in detached mode
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh up --detach
+test: ## run tests with coverage
+	@uv run pytest --cov=src --cov-report=xml --cov-report=html
 
-docker-tag-latest: ## tag the docker app image as latest
-	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
-	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
-	bash .docker/.docker-scripts/docker-compose.sh tag
+test-quick: ## run tests without coverage
+	@uv run pytest
 
-.PHONY: help
-help:
-	@uv run python -c "import re; \
-	[[print(f'\033[36m{m[0]:<25}\033[0m {m[1]}') for m in re.findall(r'^([a-zA-Z_-]+):.*?## (.*)$$', open(makefile).read(), re.M)] for makefile in ('$(MAKEFILE_LIST)').strip().split()]"
+build: ## build wheel file using hatchling
+	@uv build
 
-.DEFAULT_GOAL := help
+publish: ## publish to PyPI (requires credentials)
+	@uv build
+	@uvx twine upload dist/*
+
+test-publish: ## publish to test PyPI
+	@uv build
+	@uvx twine upload --repository testpypi dist/*
+
+docs-test: ## test documentation build
+	@cd book && bash _scripts/build.sh
+
+docs: ## Build and serve the documentation
+	@bash book/_scripts/build.sh && echo "📚 Documentation built successfully"
