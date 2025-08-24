@@ -11,7 +11,6 @@ import yaml
 
 from hypercourse._version import __version__
 
-
 __package_path__ = os.path.abspath(os.path.dirname(__file__))
 __package_name__ = os.path.basename(__package_path__)
 
@@ -25,7 +24,7 @@ def load_about() -> dict[str, Union[str, int, bool, None]]:
     if not os.path.isfile(about_path):
         click.echo(f"The `{about_path}` was not found.")
         raise click.Abort()
-    with open(about_path, "r", encoding="utf-8") as f:
+    with open(about_path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
