@@ -101,9 +101,6 @@ mkvirtualenv-system: ## create the project environment with system site packages
 	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
 	@pip install --upgrade pip setuptools wheel
 
-workon: ## activate the project environment
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
-
 initialize: install ## Initialize the project environment
 	@echo "🚀 Project initialized successfully"
 
