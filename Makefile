@@ -62,10 +62,10 @@ install-pipx: ## install pipx (pre-requisite for external tools)
 install-copier: install-pipx ## install copier (pre-requisite for init-project)
 	@command -v copier &> /dev/null || pipx install copier || true
 
-install-poetry: install-pipx ## install poetry (pre-requisite for install)
-	@command -v poetry &> /dev/null || pipx install poetry || true
+install-uv: ## install uv (pre-requisite for install)
+	@command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || true
 
-install-poe: install-pipx ## install poetry (pre-requisite for install)
+install-poe: install-pipx ## install poethepoet (pre-requisite for install)
 	@command -v poe &> /dev/null || pipx install poethepoet || true
 
 install-commitzen: install-pipx ## install commitzen (pre-requisite for commit)
@@ -90,7 +90,7 @@ mkvirtualenv-system: ## create the project environment with system site packages
 workon: ## activate the project environment
 	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
 
-initialize: install-pipx ## initialize the project environment
+initialize: install-uv install-pipx ## initialize the project environment
 	@pipx install copier
 	@pipx install poethepoet
 	@pipx install commitizen

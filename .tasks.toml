@@ -71,7 +71,7 @@ cmd = "hypercourse"
 help = "run the main program"
 
 [tool.poe.tasks.build]
-cmd = "poetry build"
+cmd = "uv build"
 help = "build the package"
 
 [tool.poe.tasks.install-ghp-import]

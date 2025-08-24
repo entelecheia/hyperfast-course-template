@@ -28,10 +28,11 @@ This is a **Copier template** for creating multilingual online courses using Jup
 ### Development
 ```bash
 # Install dependencies
-poetry install
+uv sync  # Install all dependencies including dev
+uv pip install -e .  # Install package in editable mode
 
 # Run the CLI
-poe run  # or hypercourse
+uv run hypercourse  # or just hypercourse if installed
 
 # Format code
 poe format  # Runs black and isort
@@ -80,10 +81,16 @@ make test-init-project  # Creates in tmp/ directory
 poe clean
 
 # Build package
-poe build
+poe build  # Uses uv build
 
 # Show available tasks
 poe --help
+
+# Lock dependencies
+uv lock
+
+# Update dependencies
+uv lock --upgrade
 ```
 
 ## Template Usage
@@ -104,4 +111,5 @@ When using this as a Copier template:
 - Language configuration is in `book/{lang}/_config.yml`
 - Table of contents in `book/{lang}/_toc.yml`
 - Build scripts handle preprocessing, building both language versions, and postprocessing
-- Poetry manages Python dependencies, POE (poethepoet) provides task automation
+- UV manages Python dependencies and packaging, POE (poethepoet) provides task automation
+- UV is significantly faster than Poetry for dependency resolution and installation
