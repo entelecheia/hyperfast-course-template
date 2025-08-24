@@ -25,7 +25,7 @@ def load_about() -> dict:
         click.echo(f"The `{about_path}` was not found.")
         raise click.Abort()
     with open(about_path, "r", encoding="utf-8") as f:
-        return yaml.load(f, Loader=yaml.Loader)
+        return yaml.safe_load(f)
 
 
 __about__ = load_about()

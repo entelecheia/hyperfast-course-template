@@ -1,71 +1,86 @@
-[tool.poetry]
+[project]
 name = "{{ project_name }}"
-version = "0.0.0"
+dynamic = ["version"]
 description = "{{ project_short_description }}"
-authors = ["{{ author }} <{{ email }}>"]
-license = "{{ project_license }}"
-homepage = "{{ documentation_url }}"
-repository = "https://github.com/{{ github_username }}/{{ github_repo_name }}"
+authors = [{ name = "{{ author }}", email = "{{ email }}" }]
+license = { text = "{{ project_license }}" }
 readme = "README.md"
-{% if build_and_release -%}
-packages = [{ include = "{{ package_name }}", from = "src" }]
+requires-python = ">=3.9"
+keywords = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "click>=8.1.3",
+    "pyyaml>=6.0.2",
+]
 
-{% if package_scripts -%}
-[tool.poetry.scripts]
+[project.urls]
+Homepage = "{{ documentation_url }}"
+Repository = "https://github.com/{{ github_username }}/{{ github_repo_name }}"
+
+{% if build_and_release and package_scripts -%}
+[project.scripts]
 {% for script in package_scripts -%}
 {{ script }}{{ "\n" if not loop.last }}
 {%- endfor %}
 {%- endif %}
-{%- endif %}
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-click = "^8.1.3"
-pyyaml = "^6.0.2"
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-python-semantic-release = "^7.33.1"
-isort = "^5.12.0"
-black = ">=23.0.0"
-flake8 = "^6.0.0"
-mypy = "^1.0.0"
-flake8-pyproject = "^1.2.2"
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
+[project.optional-dependencies]
+dev = [
+    "python-semantic-release>=7.33.1",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pytest>=7.2.1",
+    "pytest-cov>=4.0.0",
+    "deptry>=0.16.0",
+]
 
 {% if poe_task_files -%}
 [tool.poe]
 include = {{ poe_task_files|to_json }}
 {%- endif %}
 
-[tool.black]
-# 'extend-exclude' excludes files or directories in addition to the defaults
-extend-exclude = '''
-# A regex preceded with ^/ will apply only to files and directories
-# in the root of the project.
-(
-  _version.py
-  | .refs
-  | .copier-template
-  | tests
-  | docs
-  | book
-  | _build
-  | node_modules
-)
-'''
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+extend-exclude = [
+    "_version.py",
+    ".refs",
+    ".copier-template",
+    "tests",
+    "docs",
+    "book",
+    "_build",
+    "node_modules",
+]
 
-[tool.isort]
-profile = "black"
-skip = ['_version.py', 'node_modules', '_build', 'docs', 'tests', 'venv', '.copier-template', '.refs']
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
 
-[tool.flake8]
-ignore = ['F401', 'E501', 'W503']
-exclude = ["node_modules", "_build", "docs", "tests", "venv", ".copier-template", ".refs"]
-per-file-ignores = ['__init__.py:F401', '_version.py:W292']
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"_version.py" = ["W292"]
 
 [tool.mypy]
 namespace_packages = true
@@ -107,7 +122,7 @@ tag_format = "v$version"
 
 [tool.semantic_release]
 branch = "main"
-version_toml = "pyproject.toml:tool.poetry.version"
+version_toml = ["pyproject.toml:project.version"]
 {% if build_and_release -%}
 version_variable = "src/{{ package_name }}/_version.py:__version__"
 {% endif -%}
@@ -122,11 +137,33 @@ upload_to_repository = {{ upload_to_repository|to_json }}
 upload_to_release = {{ upload_to_release|to_json }}
 hvcs = "github" # hosting version control system, gitlab is also supported
 {% if build_and_release -%}
-build_command = "poetry build --no-cache"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+build_command = "uv build"
 {% else -%}
 build_command = "mkdir -p dist && echo 'No build command configured' > dist/release.txt"
 {%- endif %}
+
+{% if build_and_release -%}
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+{% if build_and_release -%}
+raw-options = { local_scheme = "no-local-version" }
+{% endif -%}
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ package_name }}"]
+{% endif -%}
+
+[tool.deptry]
+extend_exclude = [
+    ".copier-template",
+    ".refs",
+    "_build",
+    "book",
+    "docs",
+    "node_modules",
+    "tests",
+]

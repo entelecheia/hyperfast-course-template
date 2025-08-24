@@ -80,8 +80,8 @@ install-pipx: ## install pipx (pre-requisite for external tools)
 install-copier: install-pipx ## install copier (pre-requisite for init-project)
 	@command -v copier &> /dev/null || pipx install copier || true
 
-install-poetry: install-pipx ## install poetry (pre-requisite for install)
-	@command -v poetry &> /dev/null || pipx install poetry || true
+install-uv: ## install uv (pre-requisite for install)
+	@command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || true
 
 install-poe: install-pipx ## install poetry (pre-requisite for install)
 	@command -v poe &> /dev/null || pipx install poethepoet || true
@@ -95,18 +95,9 @@ install-precommit: install-pipx ## install pre-commit
 install-precommit-hooks: install-precommit ## install pre-commit hooks
 	@pre-commit install
 
-mkvirtualenv: ## create the project environment
-	@python3 -m venv "$$WORKON_HOME/{{project_name}}"
-	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
-	@pip install --upgrade pip setuptools wheel
-
-mkvirtualenv-system: ## create the project environment with system site packages
-	@python3 -m venv "$$WORKON_HOME/{{project_name}}" --system-site-packages
-	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
-	@pip install --upgrade pip setuptools wheel
-
-workon: ## activate the project environment
-	@. "$$WORKON_HOME/{{project_name}}/bin/activate"
+install: install-uv ## install virtual environment with uv and pre-commit hooks
+	@uv sync --all-extras
+	@uv run pre-commit install
 
 initialize: install-pipx ## initialize the project environment
 	@pipx install copier
@@ -136,3 +127,57 @@ test-init-project-force: install-copier ## test initializing the project to a te
 reinit-project: install-copier ## reinitialize the project (Warning: this may overwrite existing files!)
 	@bash -c 'args=(); while IFS= read -r file; do args+=("--skip" "$$file"); done < .copierignore; copier copy --trust "$${args[@]}" {%- if code_template_source and code_template_source != 'None' %} --data 'code_template_source={{code_template_source}}'{% endif %} --answers-file .copier-config.yaml {%- if project_name.endswith('-template') %} --vcs-ref=HEAD{% endif %} gh:entelecheia/hyperfast-course-template .'
 {% endif -%}
+
+##@ Development
+
+sync: ## sync dependencies using uv
+	@uv sync
+
+sync-all: ## sync dependencies with all extras using uv
+	@uv sync --all-extras
+
+lock: ## lock dependencies using uv
+	@uv lock
+
+lock-upgrade: ## upgrade and lock dependencies using uv
+	@uv lock --upgrade
+
+check: ## run all code quality checks (lint, type check, dependency check)
+	@uv run ruff check src/
+	@uv run mypy --config-file pyproject.toml src/
+	@uv run deptry .
+
+lint: ## run ruff linter
+	@uv run ruff check src/
+
+format: ## format code using ruff
+	@uv run ruff format src/
+	@uv run ruff check --fix src/
+
+type-check: ## run mypy type checker
+	@uv run mypy --config-file pyproject.toml src/
+
+dep-check: ## check for obsolete dependencies
+	@uv run deptry .
+
+test: ## run tests with coverage
+	@uv run pytest --cov=src --cov-report=xml --cov-report=html
+
+test-quick: ## run tests without coverage
+	@uv run pytest
+
+{% if build_and_release -%}
+build: ## build wheel file using hatchling
+	@uv build
+
+publish: ## publish to PyPI (requires credentials)
+	@uv build
+	@uvx twine upload dist/*
+
+test-publish: ## publish to test PyPI
+	@uv build
+	@uvx twine upload --repository testpypi dist/*
+{%- endif %}
+
+docs-test: ## test documentation build
+	@cd book && bash _scripts/build.sh
