@@ -25,42 +25,46 @@ This is a **Copier template** for creating multilingual online courses using Jup
 
 ## Common Commands
 
-### Development
+### Development Setup
 ```bash
-# Install dependencies
-uv sync  # Install all dependencies including dev
-uv pip install -e .  # Install package in editable mode
+make install        # Install virtual environment with uv and pre-commit hooks
+uv sync            # Sync dependencies
+```
 
-# Run the CLI
-uv run hypercourse  # or just hypercourse if installed
+### Code Quality
+```bash
+make check         # Run all code quality checks (lint, type check, dependency check)
+uv run ruff check src/  # Run linter only
+uv run ruff format src/  # Format code with ruff
+uv run mypy --config-file pyproject.toml src/   # Run type checking only
+uv run deptry .    # Check for obsolete dependencies
+```
 
-# Format code
-poe format  # Runs black and isort
+### Testing
+```bash
+make test          # Run all tests with coverage
+uv run pytest      # Run tests without coverage
+uv run pytest tests/hypercourse/test_cli.py  # Run specific test file
+uv run tox-uv      # Test across Python 3.9-3.13
+```
 
-# Lint code  
-poe lint  # Runs black --check, flake8, and isort --check
-
-# Type checking
-poe lint-mypy
-
-# Run tests
-poe tests
-poe tests-cov  # With coverage report
+### Building & Publishing
+```bash
+make build         # Build wheel file using hatchling
+make publish       # Publish to PyPI (requires credentials)
+uvx twine upload dist/*  # Manual upload to PyPI
 ```
 
 ### Book Building
 ```bash
-# Install Jupyter Book
-poe install-jupyter-book  # or install-jupyter-book-pipx
-
 # Build the book (both languages)
 poe book-build
 
 # Build with all outputs
 poe book-build-all
 
-# Publish to GitHub Pages
-poe book-publish
+# Test documentation build
+make docs-test
 ```
 
 ### Template Operations
@@ -80,17 +84,17 @@ make test-init-project  # Creates in tmp/ directory
 # Clean build artifacts
 poe clean
 
-# Build package
-poe build  # Uses uv build
-
-# Show available tasks
-poe --help
+# Show available make targets
+make help
 
 # Lock dependencies
 uv lock
 
 # Update dependencies
 uv lock --upgrade
+
+# Show available POE tasks
+poe --help
 ```
 
 ## Template Usage
@@ -111,5 +115,10 @@ When using this as a Copier template:
 - Language configuration is in `book/{lang}/_config.yml`
 - Table of contents in `book/{lang}/_toc.yml`
 - Build scripts handle preprocessing, building both language versions, and postprocessing
-- UV manages Python dependencies and packaging, POE (poethepoet) provides task automation
-- UV is significantly faster than Poetry for dependency resolution and installation
+- **UV** manages Python dependencies and packaging with 10-100x faster resolution
+- **Ruff** provides fast linting and formatting (replaces flake8, black, isort for new code)
+- **Hatchling** as the build backend following PEP 517/621 standards
+- **Pre-commit hooks** with deptry for dependency checking
+- **Tox-UV** for testing across Python versions 3.9-3.13
+- **Python-semantic-release** for automated versioning with Angular commit convention
+- POE (poethepoet) provides task automation for book building and legacy workflows

@@ -6,9 +6,13 @@ help = "format code with black"
 cmd = "isort ."
 help = "sort imports with isort"
 
+[tool.poe.tasks.format-ruff]
+cmd = "ruff format src/"
+help = "format code with ruff"
+
 [tool.poe.tasks.format]
-sequence = ["format-black", "format-isort"]
-help = "format code with black and isort"
+sequence = ["format-black", "format-isort", "format-ruff"]
+help = "format code with black, isort, and ruff"
 
 [tool.poe.tasks.lint-black]
 cmd = "black --check --diff ."
@@ -23,16 +27,20 @@ cmd = "isort --check-only --diff ."
 help = "check import sorting with isort"
 
 [tool.poe.tasks.lint-mypy]
-cmd = "mypy --config-file project.toml ."
+cmd = "mypy --config-file pyproject.toml src"
 help = "check types with mypy"
 
 [tool.poe.tasks.lint-mypy-reports]
 cmd = "mypy --config-file project.toml . --html-report ./tests/mypy-report"
 help = "generate an HTML report of the type (mypy) checker"
 
+[tool.poe.tasks.lint-ruff]
+cmd = "ruff check src/"
+help = "check code style with ruff"
+
 [tool.poe.tasks.lint]
-sequence = ["lint-black", "lint-flake8", "lint-isort"]
-help = "check code style with flake8, black, and isort"
+sequence = ["lint-black", "lint-flake8", "lint-isort", "lint-ruff"]
+help = "check code style with flake8, black, isort, and ruff"
 
 [tool.poe.tasks.tests]
 cmd = "pytest --doctest-modules"
