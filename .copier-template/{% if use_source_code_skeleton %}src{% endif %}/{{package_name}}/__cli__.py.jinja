@@ -4,6 +4,7 @@
 
 import os
 import webbrowser
+from typing import Union
 
 import click
 import yaml
@@ -15,7 +16,7 @@ __package_path__ = os.path.abspath(os.path.dirname(__file__))
 __package_name__ = os.path.basename(__package_path__)
 
 
-def load_about() -> dict:
+def load_about() -> dict[str, Union[str, int, bool, None]]:
     """
     Load the about.yml file.
     """
@@ -46,7 +47,11 @@ def open_book() -> None:
     Open the book in the browser.
     """
     click.echo("Opening the book...")
-    webbrowser.open_new_tab(__about__["homepage"])
+    homepage = __about__.get("homepage", "")
+    if isinstance(homepage, str):
+        webbrowser.open_new_tab(homepage)
+    else:
+        click.echo("Homepage URL not found in configuration.")
 
 
 # main function for the main module

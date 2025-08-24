@@ -41,6 +41,7 @@ dev = [
     "pytest>=7.2.1",
     "pytest-cov>=4.0.0",
     "deptry>=0.16.0",
+    "types-PyYAML>=6.0.12",
 ]
 
 {% if poe_task_files -%}
@@ -167,3 +168,5 @@ extend_exclude = [
     "node_modules",
     "tests",
 ]
+ignore = ["DEP002", "DEP003"]  # Ignore unused dev dependencies and transitive imports
+ignore_notebooks = true
