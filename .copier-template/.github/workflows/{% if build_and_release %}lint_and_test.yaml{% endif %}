@@ -29,40 +29,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      # install uv
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: "uv.lock"
 
-      # set up python
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
 
-      # install dependencies
       - name: Install dependencies
-        run: uv sync --all-extras
-
-      # install pre-commit hooks
-      - name: Install pre-commit hooks
-        run: uv run pre-commit install
-
-      # run linters
-      - name: Run linters
         run: |
           set -o pipefail
-          uv run ruff check src/
-          uv run mypy --config-file pyproject.toml src/
-          uv run deptry .
+          make install
 
-      # run unit tests
+      - name: Run checks
+        run: |
+          set -o pipefail
+          make check
+
       - name: Run unit-tests
         run: |
           set -o pipefail
-          uv run pytest --cov=src --cov-report=xml --cov-fail-under=50 --junitxml=tests/pytest.xml | tee tests/pytest-coverage.txt
+          make test
 
-      # add content to GitHub summary
       - name: Pytest coverage GitHub summary
         run: |
           set -o pipefail
