@@ -91,16 +91,6 @@ install-uv: ## Install uv (pre-requisite for install)
 	@echo "🚀 Installing uv"
 	@command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || true
 
-mkvirtualenv: ## create the project environment
-	@python3 -m venv "$$WORKON_HOME/deepnlp-2023"
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
-	@pip install --upgrade pip setuptools wheel
-
-mkvirtualenv-system: ## create the project environment with system site packages
-	@python3 -m venv "$$WORKON_HOME/deepnlp-2023" --system-site-packages
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
-	@pip install --upgrade pip setuptools wheel
-
 initialize: install ## Initialize the project environment
 	@echo "🚀 Project initialized successfully"
 
