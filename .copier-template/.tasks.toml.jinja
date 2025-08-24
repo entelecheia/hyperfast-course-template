@@ -1,38 +1,30 @@
-[tool.poe.tasks.format-black]
-cmd = "black ."
-help = "format code with black"
-
-[tool.poe.tasks.format-isort]
-cmd = "isort ."
-help = "sort imports with isort"
-
 [tool.poe.tasks.format]
-sequence = ["format-black", "format-isort"]
-help = "format code with black and isort"
+cmd = "ruff format src/"
+help = "format code with ruff"
 
-[tool.poe.tasks.lint-black]
-cmd = "black --check --diff ."
-help = "check code formatting with black"
+[tool.poe.tasks.format-fix]
+cmd = "ruff check --fix src/"
+help = "format and fix code with ruff"
 
-[tool.poe.tasks.lint-flake8]
-cmd = "flake8 ."
-help = "check code style with flake8"
-
-[tool.poe.tasks.lint-isort]
-cmd = "isort --check-only --diff ."
-help = "check import sorting with isort"
+[tool.poe.tasks.lint]
+cmd = "ruff check src/"
+help = "check code style with ruff"
 
 [tool.poe.tasks.lint-mypy]
-cmd = "mypy --config-file project.toml ."
+cmd = "mypy --config-file pyproject.toml src/"
 help = "check types with mypy"
 
 [tool.poe.tasks.lint-mypy-reports]
-cmd = "mypy --config-file project.toml . --html-report ./tests/mypy-report"
+cmd = "mypy --config-file pyproject.toml src/ --html-report ./tests/mypy-report"
 help = "generate an HTML report of the type (mypy) checker"
 
-[tool.poe.tasks.lint]
-sequence = ["lint-black", "lint-flake8", "lint-isort"]
-help = "check code style with flake8, black, and isort"
+[tool.poe.tasks.lint-deptry]
+cmd = "deptry ."
+help = "check for obsolete dependencies"
+
+[tool.poe.tasks.check]
+sequence = ["lint", "lint-mypy", "lint-deptry"]
+help = "run all code quality checks (lint, type check, dependency check)"
 
 [tool.poe.tasks.tests]
 cmd = "pytest --doctest-modules"
@@ -44,7 +36,7 @@ help = "run tests with pytest and generate a coverage report"
 
 [tool.poe.tasks.tests-cov-fail]
 shell = "pytest --cov=src --cov-report=xml --cov-fail-under=50 --junitxml=tests/pytest.xml | tee tests/pytest-coverage.txt"
-help = "run tests with pytest and generate a coverage report, fail if coverage is below 80%"
+help = "run tests with pytest and generate a coverage report, fail if coverage is below 50%"
 
 [tool.poe.tasks.clean-cov]
 cmd = "rm -rf .coverage* tests/htmlcov tests/pytest.xml tests/pytest-coverage.txt"
@@ -73,8 +65,8 @@ cmd = "{{ package_name }}"
 help = "run the main program"
 
 [tool.poe.tasks.build]
-cmd = "poetry build"
-help = "build the package"
+shell = "uv build"
+help = "build the package using hatchling"
 {%- endif %}
 
 [tool.poe.tasks.install-ghp-import]
@@ -106,21 +98,34 @@ help = "build the book with all outputs"
 cmd = "ghp-import -n -p -f book/_build/html"
 help = "publish the book"
 
-[tool.poe.tasks.install]
-cmd = "poetry install --without dev"
-help = "install dependencies"
+[tool.poe.tasks.sync]
+cmd = "uv sync"
+help = "sync dependencies"
 
-[tool.poe.tasks.install-dev]
-cmd = "poetry install --with dev"
-help = "install dev dependencies"
-
-[tool.poe.tasks.update]
-cmd = "poetry update"
-help = "update dependencies"
+[tool.poe.tasks.sync-all]
+cmd = "uv sync --all-extras"
+help = "sync dependencies with all extras"
 
 [tool.poe.tasks.lock]
-cmd = "poetry lock"
+cmd = "uv lock"
 help = "lock dependencies"
+
+[tool.poe.tasks.lock-upgrade]
+cmd = "uv lock --upgrade"
+help = "upgrade and lock dependencies"
+
+# Legacy compatibility tasks
+[tool.poe.tasks.install]
+cmd = "uv sync"
+help = "install dependencies (alias for sync)"
+
+[tool.poe.tasks.install-dev]
+cmd = "uv sync --all-extras"
+help = "install dev dependencies (alias for sync-all)"
+
+[tool.poe.tasks.update]
+cmd = "uv lock --upgrade"
+help = "update dependencies (alias for lock-upgrade)"
 
 [tool.poe.tasks.codecov-validate]
 cmd = "curl -X POST --data-binary @codecov.yml https://codecov.io/validate"

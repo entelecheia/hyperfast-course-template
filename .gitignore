@@ -38,3 +38,9 @@ coverage.xml
 *.cover
 htmlcov/
 pytest-coverage.*
+
+# UV lock file
+uv.lock
+
+uv.lock
+.python-version

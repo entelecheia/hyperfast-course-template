@@ -1,31 +1,56 @@
-# To do stuff with make, you type `make` in a directory that has a file called
-# "Makefile".  You can also type `make -f <makefile>` to use a different filename.
-#
-# A Makefile is a collection of rules. Each rule is a recipe to do a specific
-# thing, sort of like a grunt task or an npm package.json script.
-#
-# A rule looks like this:
-#
-# <target>: <prerequisites...>
-# 	<commands>
-#
-# The "target" is required. The prerequisites are optional, and the commands
-# are also optional, but you have to have one or the other.
-#
-# Type `make` to show the available targets and a description of each.
-#
-.DEFAULT_GOAL := help
-.PHONY: help
-help:  ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+.PHONY: install
+install: install-uv ## Install the virtual environment and install the pre-commit hooks
+	@echo "🚀 Creating virtual environment using uv"
+	@uv sync
+	@uv run pre-commit install
+
+.PHONY: check
+check: ## Run code quality tools.
+	@echo "🚀 Checking lock file consistency with 'pyproject.toml'"
+	@uv lock --locked
+	@echo "🚀 Linting code: Running pre-commit"
+	@uv run pre-commit run -a
+	@echo "🚀 Static type checking: Running mypy"
+	@uv run mypy --config-file pyproject.toml src
+	@echo "🚀 Checking for obsolete dependencies: Running deptry"
+	@uv run deptry .
+
+.PHONY: test
+test: ## Test the code with pytest
+	@echo "🚀 Testing code: Running pytest"
+	@uv run python -m pytest --cov --cov-config=pyproject.toml --cov-report=xml --junitxml=tests/pytest.xml | tee tests/pytest-coverage.txt
+
+.PHONY: build
+build: clean-build ## Build wheel file
+	@echo "🚀 Creating wheel file"
+	@uvx --from build pyproject-build --installer uv
+
+.PHONY: clean-build
+clean-build: ## Clean build artifacts
+	@echo "🚀 Removing build artifacts"
+	@uv run python -c "import shutil; import os; shutil.rmtree('dist') if os.path.exists('dist') else None"
+
+.PHONY: publish
+publish: ## Publish a release to PyPI.
+	@echo "🚀 Publishing."
+	@uvx twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+
+.PHONY: build-and-publish
+build-and-publish: build publish ## Build and publish.
+
+.PHONY: docs-test
+docs-test: ## Test if documentation can be built without warnings or errors
+	@bash book/_scripts/build.sh
+
+.PHONY: docs
+docs: ## Build and serve the documentation
+	@bash book/_scripts/build.sh && echo "📚 Documentation built successfully"
 
 
-##@ Clean-up
+##@ Utilities
 
 clean: ## run all clean commands
 	@poe clean
-
-##@ Utilities
 
 large-files: ## show the 20 largest files in the repo
 	@find . -printf '%s %p\n'| sort -nr | head -20
@@ -62,20 +87,9 @@ install-pipx: ## install pipx (pre-requisite for external tools)
 install-copier: install-pipx ## install copier (pre-requisite for init-project)
 	@command -v copier &> /dev/null || pipx install copier || true
 
-install-poetry: install-pipx ## install poetry (pre-requisite for install)
-	@command -v poetry &> /dev/null || pipx install poetry || true
-
-install-poe: install-pipx ## install poetry (pre-requisite for install)
-	@command -v poe &> /dev/null || pipx install poethepoet || true
-
-install-commitzen: install-pipx ## install commitzen (pre-requisite for commit)
-	@command -v cz &> /dev/null || pipx install commitizen || true
-
-install-precommit: install-pipx ## install pre-commit
-	@command -v pre-commit &> /dev/null || pipx install pre-commit || true
-
-install-precommit-hooks: install-precommit ## install pre-commit hooks
-	@pre-commit install
+install-uv: ## Install uv (pre-requisite for install)
+	@echo "🚀 Installing uv"
+	@command -v uv &> /dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh || true
 
 mkvirtualenv: ## create the project environment
 	@python3 -m venv "$$WORKON_HOME/deepnlp-2023"
@@ -87,15 +101,8 @@ mkvirtualenv-system: ## create the project environment with system site packages
 	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
 	@pip install --upgrade pip setuptools wheel
 
-workon: ## activate the project environment
-	@. "$$WORKON_HOME/deepnlp-2023/bin/activate"
-
-initialize: install-pipx ## initialize the project environment
-	@pipx install copier
-	@pipx install poethepoet
-	@pipx install commitizen
-	@pipx install pre-commit
-	@pre-commit install
+initialize: install ## Initialize the project environment
+	@echo "🚀 Project initialized successfully"
 
 remove-template: ## remove template-specific files
 	@rm -rf src/hypercourse
@@ -168,3 +175,10 @@ docker-tag-latest: ## tag the docker app image as latest
 	@IMAGE_VARIANT=$${IMAGE_VARIANT:-"base"} \
 	DOCKER_PROJECT_ID=$${DOCKER_PROJECT_ID:-"default"} \
 	bash .docker/.docker-scripts/docker-compose.sh tag
+
+.PHONY: help
+help:
+	@uv run python -c "import re; \
+	[[print(f'\033[36m{m[0]:<25}\033[0m {m[1]}') for m in re.findall(r'^([a-zA-Z_-]+):.*?## (.*)$$', open(makefile).read(), re.M)] for makefile in ('$(MAKEFILE_LIST)').strip().split()]"
+
+.DEFAULT_GOAL := help
