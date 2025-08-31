@@ -171,8 +171,5 @@ test-publish: ## publish to test PyPI
 	@uv build
 	@uvx twine upload --repository testpypi dist/*
 
-docs-test: ## test documentation build
-	@cd book && bash _scripts/build.sh
-
 docs: ## Build and serve the documentation
 	@bash book/_scripts/build.sh && echo "📚 Documentation built successfully"
