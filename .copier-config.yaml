@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; do NOT edit manually
-_commit: v0.1.1-62-g1d6cfb9
+_commit: v0.2.0-4-g16f53de
 _src_path: .
 author: Young Joon Lee
 build_and_release: true
@@ -39,6 +39,7 @@ project_license: CC-BY-4.0
 project_name: hyperfast-course-template
 project_short_description: Multilingual course creation template with interactive
     documentation support for international audiences
+python_version: '3.12'
 upload_to_release: true
 upload_to_repository: true
 use_launch_buttons: true

@@ -10,7 +10,7 @@
 <!-- Links: -->
 [hyperfast course template]: https://github.com/entelecheia/hyperfast-course-template
 
-[codecov-image]: https://codecov.io/gh/entelecheia/hyperfast-course-template/branch/main/graph/badge.svg?token=usYkLC6aBx
+[codecov-image]: https://codecov.io/gh/entelecheia/hyperfast-course-template/branch/main/graph/badge.svg?token=c9wCeiRNH7
 [codecov-url]: https://codecov.io/gh/entelecheia/hyperfast-course-template
 [pypi-image]: https://img.shields.io/pypi/v/hyperfast-course-template
 [license-image]: https://img.shields.io/github/license/entelecheia/hyperfast-course-template
@@ -22,14 +22,14 @@
 
 [repo-url]: https://github.com/entelecheia/hyperfast-course-template
 [pypi-url]: https://pypi.org/project/hyperfast-course-template
-[docs-url]: https://entelecheia.github.io/hyperfast-course-template
+[docs-url]: https://hypercourse.entelecheia.ai
 [changelog]: https://github.com/entelecheia/hyperfast-course-template/blob/main/CHANGELOG.md
 [contributing guidelines]: https://github.com/entelecheia/hyperfast-course-template/blob/main/CONTRIBUTING.md
 <!-- Links: -->
 
 Multilingual course creation template with interactive documentation support for international audiences
 
-- Documentation: [https://entelecheia.github.io/hyperfast-course-template][docs-url]
+- Documentation: [https://hypercourse.entelecheia.ai][docs-url]
 - GitHub: [https://github.com/entelecheia/hyperfast-course-template][repo-url]
 - PyPI: [https://pypi.org/project/hyperfast-course-template][pypi-url]
 
