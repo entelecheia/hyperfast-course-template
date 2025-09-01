@@ -49,10 +49,10 @@ jobs:
           set -o pipefail
           make check
 
-      - name: Run unit-tests
+      - name: Run unit-tests with coverage
         run: |
           set -o pipefail
-          make test
+          make test-cov-fail
 
       - name: Pytest coverage GitHub summary
         run: |

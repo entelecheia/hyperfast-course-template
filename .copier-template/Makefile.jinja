@@ -163,6 +163,9 @@ dep-check: ## check for obsolete dependencies
 test: ## run tests with coverage
 	@uv run pytest --cov=src --cov-report=xml --cov-report=html
 
+test-cov-fail:
+	@uv run pytest --cov=src --cov-report=xml --cov-fail-under=50 --junitxml=tests/pytest.xml | tee tests/pytest-coverage.txt
+
 test-quick: ## run tests without coverage
 	@uv run pytest
 
