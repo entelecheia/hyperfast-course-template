@@ -1,6 +1,6 @@
 [project]
 name = "hyperfast-course-template"
-version = "0.2.0"
+version = "0.2.1"
 description = "Multilingual course creation template with interactive documentation support for international audiences"
 authors = [{ name = "Young Joon Lee", email = "entelecheia@hotmail.com" }]
 license = "CC-BY-4.0"

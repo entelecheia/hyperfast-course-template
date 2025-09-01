@@ -1,5 +1,28 @@
 <!--next-version-placeholder-->
 
+## v0.2.1 (2025-09-01)
+
+### Bug Fixes
+
+- Add types-PyYAML to dev-dependencies for improved type checking
+  ([`2a776ae`](https://github.com/entelecheia/hyperfast-course-template/commit/2a776aea9b28072aee1bb9ae859a86748e7fbfa1))
+
+- Remove obsolete docs-test target from Makefile
+  ([`6e12375`](https://github.com/entelecheia/hyperfast-course-template/commit/6e123759bff4322a1c88d27b1b938187098a89c2))
+
+- Remove unnecessary newline and simplify file opening in CLI template
+  ([`fa38c3b`](https://github.com/entelecheia/hyperfast-course-template/commit/fa38c3b31a500853314e2cc35e13a8b364a5d9f7))
+
+- Update project to Python 3.12 and adjust documentation links
+  ([`64b8cf5`](https://github.com/entelecheia/hyperfast-course-template/commit/64b8cf50a714c309947821e414456a509b26f986))
+
+- Update Python version to 3.12 in workflows and configuration
+  ([`aa3ad79`](https://github.com/entelecheia/hyperfast-course-template/commit/aa3ad79aac32ea9429313ed8ea78e0268e767666))
+
+- Update test workflow to include coverage failure threshold and add new test command
+  ([`7c7b9e7`](https://github.com/entelecheia/hyperfast-course-template/commit/7c7b9e745c48f4624d11142a19723d3e1df1efe4))
+
+
 ## v0.1.2 (2025-08-24)
 
 ### Bug Fixes
