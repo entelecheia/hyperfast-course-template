@@ -34,6 +34,7 @@ dev-dependencies = [
     "mypy>=0.991",
     "pytest-cov>=4.0.0",
     "ruff>=0.6.9",
+    "types-PyYAML",
     "python-semantic-release>=9.0.0",
     "jupyter-book>=1.0.4.post1",
     "docutils",
