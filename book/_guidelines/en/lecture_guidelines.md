@@ -4,7 +4,7 @@
 
 ### 1.1 Basic Structure
 
-- **Title**: `# Week N - [Topic Name]`
+- **Title**: `# Week N: [Topic Name]`
 - **Section Organization**: 3-7 main sections with clear progression
 - **Subsection Hierarchy**: Use `##`, `###` for logical structure
 - **Checkpoint Questions**: Place at the end of each section
