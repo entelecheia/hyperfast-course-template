@@ -4,7 +4,7 @@
 
 ### 1.1 Basic Structure
 
-- **Title**: `# **Week N Workshop: [Topic Name]**`
+- **Title**: `# Week N Workshop: [Topic Name]`
 - **Introduction Section**: Workshop objectives and core tools introduction
 - **Part-based Organization**: 3-4 main parts with clear progression
 - **Hands-on Section**: Specific code examples and execution methods
